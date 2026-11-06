@@ -109,10 +109,33 @@ const TXT_ETAPA = {
   nota:"<strong>Avaliar tópico:</strong> você verá um tópico gerado automaticamente e indicará quão bem ele descreve a transcrição (0, 1 ou 2)."
 };
 const INSTRUCOES_HTML = `
-<p>Obrigado por participar. Para cada transcrição, você vai fazer ${ETAPAS.length>1?"as seguintes etapas":"a seguinte tarefa"}:</p>
-<ul>${ETAPAS.map((s,k)=>`<li>${ETAPAS.length>1?(k+1)+". ":""}${TXT_ETAPA[s]}</li>`).join("")}</ul>
-<p>Seu progresso fica salvo e você pode continuar depois, em qualquer aparelho.</p>
-<!-- TODO: cole aqui o TCLE, se houver -->`;
+<p>Prezado(a) participante,</p>
+<p>Você está sendo convidado(a) a participar da pesquisa “Crianças e Adolescentes em Plataformas de Mídias Sociais: Perigos, Desafios e Oportunidades”, realizada no Departamento de Ciência da Computação (DCC) da Universidade Federal de Minas Gerais (UFMG), sob a coordenação da professora Jussara Marques de Almeida.</p>
+<p>O projeto busca contribuir para que as plataformas de mídias sociais sejam ambientes mais seguros para crianças e adolescentes. Nesta etapa da pesquisa, convidamos você a responder a um questionário on-line. O objetivo é avaliar se os resumos, as palavras-chave e as etiquetas descritivas (<em>tags</em>) apresentados no questionário representam com fidelidade o conteúdo de transcrições de vídeos do TikTok.</p>
+<h2>Sobre as transcrições</h2>
+<p>As transcrições são de vídeos públicos do TikTok coletados por meio da interface oficial de coleta de dados da plataforma (API). Os vídeos selecionados estão associados a hashtags relacionadas a histórias com personagens em forma de frutas, também conhecidas como “novelas de frutas”.</p>
+<h2>O que você vai fazer</h2>
+<p>Em cada questão, você lerá a transcrição de um vídeo e avaliará o material apresentado com ela. Se a questão apresentar um resumo, você avaliará em que medida ele expressa o que foi dito na transcrição. Se apresentar palavras-chave ou etiquetas descritivas, você avaliará em que medida elas correspondem ao conteúdo do texto. Siga as orientações de cada questão.</p>
+<p>Seu progresso será salvo. Caso faça uma pausa, você poderá retomar o questionário mais tarde, inclusive em outro dispositivo.</p>
+<h2>Participação voluntária e possíveis riscos</h2>
+<p>Sua participação é voluntária. Durante a atividade, você poderá sentir cansaço ou desconforto. Algumas transcrições podem conter linguagem pejorativa, manifestações de discriminação, como homofobia e racismo, ou relatos potencialmente perturbadores.</p>
+<p>Você pode deixar qualquer pergunta sem resposta, fazer uma pausa ou encerrar sua participação a qualquer momento, sem qualquer prejuízo. Caso sofra algum dano decorrente de sua participação na pesquisa, você tem direito a buscar indenização.</p>
+<h2>Dados coletados e uso das respostas</h2>
+<p>Você não precisará fornecer informações pessoais para participar. Caso informe espontaneamente algum dado pessoal, a equipe de pesquisa o manterá em sigilo.</p>
+<p>As respostas serão utilizadas na construção de uma taxonomia, ou seja, um conjunto organizado de categorias, e no posterior desenvolvimento de um método para detectar riscos e danos relacionados aos conteúdos das mídias sociais. Os resultados poderão ser divulgados em publicações científicas, preservando-se a identidade dos participantes.</p>
+<p>A equipe de pesquisa armazenará os dados em formato digital na UFMG por cinco anos após o término da pesquisa, conforme previsto na Resolução CNS nº 466/2012. Ao final desse período, a equipe destruirá os dados.</p>
+<h2>Custos e benefícios</h2>
+<p>A participação não terá custo financeiro para você. Não haverá pagamento pela participação nem benefício pessoal direto.</p>
+<p>Sua avaliação ajudará a equipe a compreender em que medida os resumos, as palavras-chave e as etiquetas descrevem com fidelidade o conteúdo dos vídeos. Os resultados poderão contribuir, de forma indireta, para o desenvolvimento de métodos de identificação de conteúdos potencialmente prejudiciais a crianças e adolescentes nas mídias sociais.</p>
+<h2>Consentimento</h2>
+<p>Ao prosseguir para o questionário, você manifesta sua concordância em participar desta pesquisa. Recomendamos que você guarde uma cópia deste Termo de Consentimento Livre e Esclarecido (TCLE) para consultá-lo quando desejar.</p>
+<h2>Contatos para dúvidas sobre a pesquisa</h2>
+<ul>
+<li><strong>Kênia Carolina Gonçalves</strong>: keniacarolina@dcc.ufmg.br</li>
+<li><strong>Professora Jussara Marques de Almeida</strong>: jussara@dcc.ufmg.br | (31) 3409-5860<br>Departamento de Ciência da Computação, prédio do ICEx, Universidade Federal de Minas Gerais. Av. Presidente Antônio Carlos, 6627, Pampulha, Belo Horizonte – MG, CEP 31270-901.</li>
+</ul>
+<h2>Contato para dúvidas sobre questões éticas</h2>
+<p><strong>Comitê de Ética em Pesquisa da UFMG (CEP-UFMG)</strong><br>coep@prpq.ufmg.br | (31) 3409-4592<br>Av. Presidente Antônio Carlos, 6627, Unidade Administrativa II, 2º andar, sala 2005, Pampulha, Belo Horizonte – MG, CEP 31270-901.</p>`;
 
 /* ---------- utilitários ---------- */
 function h(tag, attrs, ...kids){
@@ -155,7 +178,7 @@ function avancar(it){
 
 function init(){
   try{ S.pending = JSON.parse(ls.get(KEY)||"[]").filter(p=>p&&p.a&&p.item&&p.v); }catch(e){ S.pending=[]; }
-  renderIntro(()=>renderPeople(), "Entendi, quero começar");
+  renderIntro(()=>renderPeople(), "Concordo com TCLE e desejo prosseguir");
 }
 function renderMsg(t){ $app.replaceChildren(h("div",{class:"card"},h("p",{class:"lead"},t))); }
 function brand(sub){ return h("div",{class:"brand"},"Avaliação",h("small",{},sub)); }
@@ -165,7 +188,7 @@ function renderIntro(next,label){
   S.view="intro";
   const box=h("div",{class:"intro",style:"display:flex;flex-direction:column;gap:12px"}); box.innerHTML=INSTRUCOES_HTML;   // texto fixo deste arquivo
   $app.replaceChildren(h("div",{class:"topbar"},h("div",{class:"bar-row"},brand("sumários e tópicos"))),
-    h("div",{class:"card"},h("h1",{},"Instruções"),box,h("div",{class:"row"},h("button",{class:"btn primary",onclick:next},label))));
+    h("div",{class:"card"},h("h1",{},"Termo de Consentimento Livre e Esclarecido (TCLE) e instruções"),box,h("div",{class:"row"},h("button",{class:"btn primary",onclick:next},label))));
   window.scrollTo(0,0);
 }
 
@@ -179,7 +202,7 @@ async function renderPeople(msg){
   flush();
   $app.replaceChildren(
     h("div",{class:"topbar"},h("div",{class:"bar-row"},brand("sumários e tópicos"),
-      h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderPeople(),"Voltar")},"Ver instruções"))),
+      h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderPeople(),"Voltar")},"Ver TCLE e instruções"))),
     h("div",{class:"card"},
       h("h1",{},"Quem é você?"),
       h("p",{class:"lead"},"Clique no seu nome para começar ou continuar de onde parou."),
@@ -217,7 +240,7 @@ function renderItem(keepScroll){
   const topbar=h("div",{class:"topbar"},
     h("div",{class:"bar-row"},brand(`${S.ann.nome} · ${done}/${n} concluídos`),
       h("div",{class:"row"},
-        h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderItem(),"Voltar")},"Ver instruções"),
+        h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderItem(),"Voltar")},"Ver TCLE e instruções"),
         h("button",{class:"linkbtn",onclick:()=>renderPeople()},"Trocar de pessoa"))),
     h("div",{class:"progress"},h("i",{style:`width:${n?100*done/n:0}%`})));
   if(!n){ $app.replaceChildren(topbar,h("div",{class:"card"},h("p",{class:"lead"},"Ainda não há itens para você. Avise quem coordena o projeto."))); return; }
