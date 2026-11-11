@@ -94,9 +94,9 @@ const CRITERIOS = [
 ];
 const PERGUNTA_PRINCIPAL = "Quão preciso esse tópico representa o assunto central da transcrição?";
 const NOTA_PRINCIPAL = [
-  [0,"Incorrect or unrelated"],
-  [1,"Partially correct (too broad, too narrow, or captures a secondary aspect)"],
-  [2,"Correct and appropriately specific"]
+  [0,"Incorreto ou sem relação com a transcrição"],
+  [1,"Parcialmente correto (amplo demais, específico demais ou capta um aspecto secundário)"],
+  [2,"Correto e com especificidade adequada"]
 ];
 const PERGUNTAS_SECUNDARIO = [["relevante","Esse tópico é relevante?"],["central","Esse tópico é central?"]];
 const TITULO = {sumario:"Sumário", principal:"Tópico principal", secundarios:"Tópico secundário", tags:"Sobre as marcações de conteúdo", inadequado:"Conteúdo potencialmente inadequado"};
@@ -302,7 +302,7 @@ function secPrincipal(it){
   const cur=it.topico_principal_nota;
   return h("div",{class:"card"},
     h("h2",{},TITULO.principal),
-    h("div",{class:"term"},it.topico_principal),
+    h("div",{class:"texto"},it.topico_principal),
     h("p",{class:"q"},PERGUNTA_PRINCIPAL),
     h("div",{class:"opts",role:"radiogroup","aria-label":PERGUNTA_PRINCIPAL},
       NOTA_PRINCIPAL.map(([v,t])=>h("button",{class:`opt o${v}`+(cur===v?" on":""),role:"radio","aria-checked":cur===v?"true":"false",
@@ -323,7 +323,7 @@ function secSecundarios(it){
     it.sec.map((top,k)=>{ const cur=(it.secundarios||{})[k]||{};
       return h("div",{class:"crit"},
         multi?h("div",{class:"sec",style:"margin:0"},`${k+1} de ${it.sec.length}`):null,
-        h("div",{class:"term"},top),
+        h("div",{class:"texto"},top),
         PERGUNTAS_SECUNDARIO.map(([campo,perg])=>h("div",{},
           h("p",{class:"q",style:"margin-bottom:8px"},perg),
           simNao(cur[campo],v=>{ const o={...(it.secundarios||{})}; o[k]={...(o[k]||{}),[campo]:v}; queue(it,"secundarios",o); renderItem(true); },perg)))); }));
