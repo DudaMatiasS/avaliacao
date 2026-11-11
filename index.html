@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Avaliação de sumários, tópicos e marcações</title>
+<title>Avaliação · AI Fruits</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 :root{
@@ -202,7 +202,7 @@ function brand(sub){ return h("div",{class:"brand"},"Avaliação",h("small",{},s
 function renderIntro(next,label){
   S.view="intro";
   const box=h("div",{class:"intro",style:"display:flex;flex-direction:column;gap:12px"}); box.innerHTML=INSTRUCOES_HTML;   // texto fixo deste arquivo
-  $app.replaceChildren(h("div",{class:"topbar"},h("div",{class:"bar-row"},brand("sumários e tópicos"))),
+  $app.replaceChildren(h("div",{class:"topbar"},h("div",{class:"bar-row"},brand("AI Fruits"))),
     h("div",{class:"card"},h("h1",{},"Termo de Consentimento Livre e Esclarecido (TCLE) e instruções"),box,h("div",{class:"row"},h("button",{class:"btn primary",onclick:next},label))));
   window.scrollTo(0,0);
 }
@@ -216,7 +216,7 @@ async function renderPeople(msg){
     h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>renderPeople()},"Tentar de novo")))); }
   flush();
   $app.replaceChildren(
-    h("div",{class:"topbar"},h("div",{class:"bar-row"},brand("sumários e tópicos"),
+    h("div",{class:"topbar"},h("div",{class:"bar-row"},brand("AI Fruits"),
       h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderPeople(),"Voltar")},"Ver TCLE e instruções"))),
     h("div",{class:"card"},
       h("h1",{},"Quem é você?"),
@@ -255,8 +255,7 @@ function renderItem(keepScroll){
   const topbar=h("div",{class:"topbar"},
     h("div",{class:"bar-row"},brand(`${S.ann.nome} · ${done}/${n} concluídos`),
       h("div",{class:"row"},
-        h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderItem(),"Voltar")},"Ver TCLE e instruções"),
-        h("button",{class:"linkbtn",onclick:()=>renderPeople()},"Trocar de pessoa"))),
+        h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderItem(),"Voltar")},"Ver TCLE e instruções"))),
     h("div",{class:"progress"},h("i",{style:`width:${n?100*done/n:0}%`})));
   if(!n){ $app.replaceChildren(topbar,h("div",{class:"card"},h("p",{class:"lead"},"Ainda não há itens para você. Avise quem coordena o projeto."))); return; }
 
