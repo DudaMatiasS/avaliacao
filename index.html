@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Avaliação de sumários e tópicos</title>
+<title>Avaliação de sumários, tópicos e marcações</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 :root{
@@ -33,18 +33,17 @@ button{font:inherit;color:inherit;cursor:pointer}
 .linkbtn{background:none;border:0;color:var(--muted);padding:4px 6px;text-decoration:underline;text-underline-offset:3px}
 .sec{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:14px}
-.texto{font-size:16px;line-height:1.6;background:var(--code-bg);border-radius:4px;padding:14px;white-space:pre-wrap;overflow-wrap:anywhere}
-
+.texto{font-size:16px;line-height:1.6;background:var(--code-bg);border-radius:4px;padding:14px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:42vh;overflow:auto}
 .term{font-size:22px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 .q{font-size:17px;font-weight:600;margin:0;text-wrap:balance}
 .hint{font-size:13px;color:var(--muted);margin:0}
+.def{margin:0;max-width:68ch;overflow-wrap:anywhere}
+.def b{display:block;font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .steps{display:flex;gap:6px;flex-wrap:wrap}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:4px 12px;font:500 12px var(--mono)}
 .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.chip.ok:not(.on){border-color:var(--yes);color:var(--yes)}
 .chip:disabled{opacity:.45;cursor:default}
-textarea{font:inherit;font-size:16px;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px;width:100%;min-height:72px;resize:vertical}
-.count{font:12px var(--mono);color:var(--muted)}
-.count.over{color:var(--no)}
 .likert{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .lk{border:2px solid var(--line);background:var(--surface);border-radius:6px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;min-height:76px;font-size:13px;line-height:1.25}
 .lk b{font-size:18px}
@@ -58,9 +57,15 @@ textarea{font:inherit;font-size:16px;color:var(--fg);background:var(--surface);b
 .opts{display:flex;flex-direction:column;gap:8px}
 .opt{border:2px solid var(--line);background:var(--surface);border-radius:6px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;text-align:left}
 .opt b{font-size:20px;min-width:22px;line-height:1.2}
-.o0:hover,.o0.on{border-color:var(--yes);background:var(--yes-soft);color:var(--yes)}
+.o0:hover,.o0.on{border-color:var(--no);background:var(--no-soft);color:var(--no)}
 .o1:hover,.o1.on{border-color:var(--mid);background:var(--mid-soft);color:var(--mid)}
-.o2:hover,.o2.on{border-color:var(--no);background:var(--no-soft);color:var(--no)}
+.o2:hover,.o2.on{border-color:var(--yes);background:var(--yes-soft);color:var(--yes)}
+.ans{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ans button{min-height:52px;border-radius:6px;border:2px solid var(--line);background:var(--surface);font-size:18px;font-weight:600}
+.ans .yes:hover,.ans .yes.on{border-color:var(--yes);background:var(--yes-soft);color:var(--yes)}
+.ans .no:hover,.ans .no.on{border-color:var(--no);background:var(--no-soft);color:var(--no)}
+.subnav{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
+.subnav span{font:12px var(--mono);color:var(--muted)}
 .nav{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:8px 14px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:500}
@@ -70,10 +75,8 @@ textarea{font:inherit;font-size:16px;color:var(--fg);background:var(--surface);b
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 h1{font-size:22px;margin:0;line-height:1.25}
 .lead{color:var(--muted);margin:0;max-width:62ch}
-.intro{max-width:none}
-.intro p,.intro ul{margin:0}
+.intro p,.intro ul{margin:0;max-width:68ch}
 .intro ul{padding-left:20px;display:flex;flex-direction:column;gap:6px}
-.intro h2{font-size:15px;margin:6px 0 0}
 .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .person{border:2px solid var(--line);background:var(--surface);border-radius:6px;padding:16px 10px;font-size:18px;font-weight:600;overflow-wrap:anywhere}
 .person:hover{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
@@ -82,60 +85,43 @@ h1{font-size:22px;margin:0;line-height:1.25}
 <script src="config.js"></script>
 <script>
 const CFG = window.SUM_CONFIG;
-const MAXP = Number(CFG.TOPICO_MAX_PALAVRAS) || 0;
 const $app = document.getElementById("app");
 
-/* ---------- textos das perguntas (edite aqui) ---------- */
-const PERGUNTA_TOPICO = "What is the main topic addressed in the transcript?";
-const PERGUNTA_NOTA = "Quão precisamente o tópico abaixo descreve a transcrição?";
-const NOTA_TOPICO = [
-  [0, "Representa o tópico principal de forma precisa e com especificidade adequada."],
-  [1, "Representa um aspecto relevante relacionado à transcrição, mas é muito amplo ou muito específico, ou não captura o aspecto central."],
-  [2, "Não representa adequadamente o tópico principal ou não tem nada a ver."]
-];
+/* ---------- textos das perguntas (edite aqui; as tags ficam no config.js) ---------- */
 const LIKERT = [[1,"Discordo fortemente"],[2,"Discordo"],[3,"Nem discordo nem concordo"],[4,"Concordo"],[5,"Concordo fortemente"]];
 const CRITERIOS = [
-  ["consistencia","1. Consistência factual","O sumário contém apenas informações presentes no texto original? Ele evita criar dados ou distorcer fatos (alucinações)?"],
-  ["cobertura","2. Cobertura","Os pontos principais e as ideias centrais do texto original foram incluídos? Detalhes irrelevantes foram descartados?"],
-  ["concisao","3. Concisão","O sumário vai direto ao ponto? Há redundâncias, repetições ou excesso de palavras?"]
+  ["consistencia","1. Consistência factual","O sumário contém apenas informações presentes no texto original, evitando criar dados ou distorcer fatos (alucinações)."],
+  ["cobertura","2. Cobertura","Os pontos principais e as ideias centrais do texto original foram incluídos e os detalhes irrelevantes foram descartados."],
+  ["concisao","3. Concisão","O sumário vai direto ao ponto, sem redundâncias, repetições ou excesso de palavras."]
 ];
-/* Etapas ativas, na ordem (definidas no config.js). "nota" só funciona depois de "topico". */
-const ETAPAS = (()=>{ let e=(CFG.ETAPAS||["sumario"]).filter(s=>["sumario","topico","nota"].includes(s));
-  if(e.includes("nota")&&!(e.includes("topico")&&e.indexOf("topico")<e.indexOf("nota"))) e=e.filter(s=>s!=="nota");
+const PERGUNTA_PRINCIPAL = "Quão preciso esse tópico representa o assunto central da transcrição?";
+const NOTA_PRINCIPAL = [
+  [0,"Incorrect or unrelated"],
+  [1,"Partially correct (too broad, too narrow, or captures a secondary aspect)"],
+  [2,"Correct and appropriately specific"]
+];
+const PERGUNTAS_SECUNDARIO = [["relevante","Esse tópico é relevante?"],["central","Esse tópico é central?"]];
+
+/* ---------- etapas ---------- */
+const limpaTags = l => (Array.isArray(l)?l:[]).filter(t=>t&&t.id&&t.pergunta).map(t=>({id:String(t.id),pergunta:String(t.pergunta),definicao:String(t.definicao||"")}));
+const LISTAS = { tags:limpaTags(CFG.TAGS_CONTEUDO), inadequado:limpaTags(CFG.TAGS_INADEQUADO) };
+const NOME_ETAPA = {sumario:"Sumário", principal:"Tópico principal", secundarios:"Tópicos secundários", tags:"Marcações de conteúdo", inadequado:"Conteúdo inadequado"};
+const TODAS = ["sumario","principal","secundarios","tags","inadequado"];
+// Etapas ativas, na ordem do config.js. Etapas de tags sem nenhuma tag cadastrada são puladas.
+const ETAPAS = (()=>{ const e=(CFG.ETAPAS||TODAS).filter((s,k,a)=>TODAS.includes(s)&&a.indexOf(s)===k&&(!LISTAS[s]||LISTAS[s].length));
   return e.length?e:["sumario"]; })();
 const TXT_ETAPA = {
-  sumario:"<strong>Sumário:</strong> leia a transcrição e o sumário gerado automaticamente e avalie consistência factual, cobertura e concisão (de 1 a 5).",
-  topico:`<strong>Tópico:</strong> leia a transcrição e escreva, com suas palavras, o tópico principal${MAXP?` (até ${MAXP} palavras)`:""}. Depois de enviado, o tópico não pode ser alterado.`,
-  nota:"<strong>Avaliar tópico:</strong> você verá um tópico gerado automaticamente e indicará quão bem ele descreve a transcrição (0, 1 ou 2)."
+  sumario:"<strong>Sumário:</strong> leia a transcrição e o sumário gerado automaticamente e indique o quanto concorda com três afirmações (consistência factual, cobertura e concisão).",
+  principal:"<strong>Tópico principal:</strong> você verá um tópico gerado automaticamente e indicará quão bem ele representa o assunto central da transcrição (0, 1 ou 2).",
+  secundarios:"<strong>Tópicos secundários:</strong> para cada tópico secundário, um por vez, responda se ele é relevante e se ele é central.",
+  tags:"<strong>Marcações de conteúdo:</strong> para cada marcação, uma por vez, leia a pergunta e a definição e responda Sim ou Não.",
+  inadequado:"<strong>Conteúdo potencialmente inadequado:</strong> igual às marcações de conteúdo: uma pergunta por vez, com definição, respondendo Sim ou Não."
 };
 const INSTRUCOES_HTML = `
-<p>Prezado(a) participante,</p>
-<p>Você está sendo convidado(a) a participar da pesquisa “Crianças e Adolescentes em Plataformas de Mídias Sociais: Perigos, Desafios e Oportunidades”, realizada no Departamento de Ciência da Computação (DCC) da Universidade Federal de Minas Gerais (UFMG), sob a coordenação da professora Jussara Marques de Almeida.</p>
-<p>O projeto busca contribuir para que as plataformas de mídias sociais sejam ambientes mais seguros para crianças e adolescentes. Nesta etapa da pesquisa, convidamos você a responder a um questionário on-line. O objetivo é avaliar se os resumos, as palavras-chave e as etiquetas descritivas (<em>tags</em>) apresentados no questionário representam com fidelidade o conteúdo de transcrições de vídeos do TikTok.</p>
-<h2>Sobre as transcrições</h2>
-<p>As transcrições são de vídeos públicos do TikTok coletados por meio da interface oficial de coleta de dados da plataforma (API). Os vídeos selecionados estão associados a hashtags relacionadas a histórias com personagens em forma de frutas, também conhecidas como “novelas de frutas”.</p>
-<h2>O que você vai fazer</h2>
-<p>Em cada questão, você lerá a transcrição de um vídeo e avaliará o material apresentado com ela. Se a questão apresentar um resumo, você avaliará em que medida ele expressa o que foi dito na transcrição. Se apresentar palavras-chave ou etiquetas descritivas, você avaliará em que medida elas correspondem ao conteúdo do texto. Siga as orientações de cada questão.</p>
-<p>Seu progresso será salvo. Caso faça uma pausa, você poderá retomar o questionário mais tarde, inclusive em outro dispositivo.</p>
-<h2>Participação voluntária e possíveis riscos</h2>
-<p>Sua participação é voluntária. Durante a atividade, você poderá sentir cansaço ou desconforto. Algumas transcrições podem conter linguagem pejorativa, manifestações de discriminação, como homofobia e racismo, ou relatos potencialmente perturbadores.</p>
-<p>Você pode deixar qualquer pergunta sem resposta, fazer uma pausa ou encerrar sua participação a qualquer momento, sem qualquer prejuízo. Caso sofra algum dano decorrente de sua participação na pesquisa, você tem direito a buscar indenização.</p>
-<h2>Dados coletados e uso das respostas</h2>
-<p>Você não precisará fornecer informações pessoais para participar. Caso informe espontaneamente algum dado pessoal, a equipe de pesquisa o manterá em sigilo.</p>
-<p>As respostas serão utilizadas na construção de uma taxonomia, ou seja, um conjunto organizado de categorias, e no posterior desenvolvimento de um método para detectar riscos e danos relacionados aos conteúdos das mídias sociais. Os resultados poderão ser divulgados em publicações científicas, preservando-se a identidade dos participantes.</p>
-<p>A equipe de pesquisa armazenará os dados em formato digital na UFMG por cinco anos após o término da pesquisa, conforme previsto na Resolução CNS nº 466/2012. Ao final desse período, a equipe destruirá os dados.</p>
-<h2>Custos e benefícios</h2>
-<p>A participação não terá custo financeiro para você. Não haverá pagamento pela participação nem benefício pessoal direto.</p>
-<p>Sua avaliação ajudará a equipe a compreender em que medida os resumos, as palavras-chave e as etiquetas descrevem com fidelidade o conteúdo dos vídeos. Os resultados poderão contribuir, de forma indireta, para o desenvolvimento de métodos de identificação de conteúdos potencialmente prejudiciais a crianças e adolescentes nas mídias sociais.</p>
-<h2>Consentimento</h2>
-<p>Ao prosseguir para o questionário, você manifesta sua concordância em participar desta pesquisa. Recomendamos que você guarde uma cópia deste Termo de Consentimento Livre e Esclarecido (TCLE) para consultá-lo quando desejar.</p>
-<h2>Contatos para dúvidas sobre a pesquisa</h2>
-<ul>
-<li><strong>Kênia Carolina Gonçalves</strong>: keniacarolina@dcc.ufmg.br</li>
-<li><strong>Professora Jussara Marques de Almeida</strong>: jussara@dcc.ufmg.br | (31) 3409-5860<br>Departamento de Ciência da Computação, prédio do ICEx, Universidade Federal de Minas Gerais. Av. Presidente Antônio Carlos, 6627, Pampulha, Belo Horizonte – MG, CEP 31270-901.</li>
-</ul>
-<h2>Contato para dúvidas sobre questões éticas</h2>
-<p><strong>Comitê de Ética em Pesquisa da UFMG (CEP-UFMG)</strong><br>coep@prpq.ufmg.br | (31) 3409-4592<br>Av. Presidente Antônio Carlos, 6627, Unidade Administrativa II, 2º andar, sala 2005, Pampulha, Belo Horizonte – MG, CEP 31270-901.</p>`;
+<p>Obrigado por participar. Para cada transcrição, você vai fazer ${ETAPAS.length>1?"as seguintes etapas":"a seguinte tarefa"}:</p>
+<ul>${ETAPAS.map(s=>`<li>${TXT_ETAPA[s]}</li>`).join("")}</ul>
+<p>Seu progresso fica salvo e você pode continuar depois, em qualquer aparelho. Você pode voltar e mudar uma resposta; a nova substitui a anterior.</p>
+<!-- TODO: cole aqui o TCLE, se houver -->`;
 
 /* ---------- utilitários ---------- */
 function h(tag, attrs, ...kids){
@@ -156,29 +142,56 @@ async function rpc(fn, body){
   if(!r.ok) throw new Error("HTTP "+r.status);
   return r.json();
 }
-function contaPalavras(t){ const s=String(t||"").trim(); return s ? s.split(/\s+/).length : 0; }
+// Tópicos secundários chegam como texto: lista JSON (["a","b"]), lista do Python (['a', 'b'])
+// ou separados por quebra de linha, ";" ou "|".
+function parseLista(t){
+  if(Array.isArray(t)) return t.map(x=>String(x).trim()).filter(Boolean);
+  t=String(t||"").trim(); if(!t) return [];
+  if(t[0]==="["&&t.endsWith("]")){
+    try{ const a=JSON.parse(t); if(Array.isArray(a)) return a.map(x=>String(x).trim()).filter(Boolean); }catch(e){}
+    const out=[]; let m; const re=/'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"/g;
+    while((m=re.exec(t))) out.push((m[1]??m[2]).replace(/\\(.)/g,"$1").trim());
+    if(out.length) return out.filter(Boolean);
+    t=t.slice(1,-1);
+  }
+  return t.split(/\r?\n|;|\|/).map(x=>x.trim()).filter(Boolean);
+}
 
 /* ---------- estado ---------- */
-const NOME_ETAPA = {topico:"Tópico", nota:"Avaliar tópico", sumario:"Sumário"};
-const CAMPOS_ETAPA = {sumario:["consistencia","cobertura","concisao"], topico:["topico_humano"], nota:["topico_nota"]};
-const S = { ann:null, itens:[], idx:0, step:"topico", view:"", pending:[], flushing:false, saveErr:null, rasc:{}, enviando:false, erroTopico:null };
-const KEY = "sum_pending";
+const S = { ann:null, itens:[], idx:0, step:ETAPAS[0], sub:0, view:"", pending:[], flushing:false, saveErr:null };
+const KEY = "sum_pending_v2";
+const CAMPOS = ["consistencia","cobertura","concisao","topico_principal_nota","secundarios","tags","inadequado"];
+const bool = v => typeof v==="boolean";
 
-function feita(it,s){ return CAMPOS_ETAPA[s].every(c=>it[c]!=null); }
-function etapaMax(it){ return ETAPAS.find(s=>!feita(it,s)) || ETAPAS[ETAPAS.length-1]; }
+function nSub(it,s){ return s==="secundarios"?it.sec.length : LISTAS[s]?LISTAS[s].length : 0; }
+function subFeito(it,s,k){
+  if(s==="secundarios"){ const o=(it.secundarios||{})[k]; return !!o&&bool(o.relevante)&&bool(o.central); }
+  return bool((it[s]||{})[LISTAS[s][k].id]);
+}
+function primeiroSub(it,s){ const n=nSub(it,s); for(let k=0;k<n;k++) if(!subFeito(it,s,k)) return k; return 0; }
+// Etapa sem nada a responder neste item (sem tópico principal ou sem tópicos secundários).
+function vazia(it,s){ return s==="principal" ? !it.topico_principal : s==="secundarios" ? !it.sec.length : false; }
+function feita(it,s){
+  if(vazia(it,s)) return true;
+  if(s==="sumario") return CRITERIOS.every(([c])=>it[c]!=null);
+  if(s==="principal") return it.topico_principal_nota!=null;
+  for(let k=0,n=nSub(it,s);k<n;k++) if(!subFeito(it,s,k)) return false;
+  return true;
+}
+function etapaMax(it){ return ETAPAS.find(s=>!feita(it,s)) || ETAPAS.filter(s=>!vazia(it,s)).pop() || ETAPAS[0]; }
 function completo(it){ return ETAPAS.every(s=>feita(it,s)); }
-// Depois de concluir a etapa atual: vai para a próxima etapa ou para o próximo item pendente.
+// Depois de concluir a etapa atual: vai para a próxima etapa (com algo a responder) ou para o próximo item pendente.
 function avancar(it){
   if(S.view!=="item"||S.itens[S.idx]!==it) return;
-  const k=ETAPAS.indexOf(S.step);
-  if(k>=0&&k<ETAPAS.length-1){ S.step=ETAPAS[k+1]; renderItem(); return; }
-  const prox=S.itens.findIndex((x,j)=>j>S.idx&&!completo(x)), alvo=prox>=0?prox:S.itens.findIndex(x=>!completo(x));
+  const prox=ETAPAS.slice(ETAPAS.indexOf(S.step)+1).find(s=>!vazia(it,s));
+  if(prox){ S.step=prox; S.sub=primeiroSub(it,prox); renderItem(); return; }
+  const p=S.itens.findIndex((x,j)=>j>S.idx&&!completo(x)), alvo=p>=0?p:S.itens.findIndex(x=>!completo(x));
   if(alvo>=0) go(alvo); else renderItem(true);
 }
 
 function init(){
   try{ S.pending = JSON.parse(ls.get(KEY)||"[]").filter(p=>p&&p.a&&p.item&&p.v); }catch(e){ S.pending=[]; }
-  renderIntro(()=>renderPeople(), "Concordo com TCLE e desejo prosseguir");
+  renderIntro(()=>renderPeople(), "Entendi, quero começar");
 }
 function renderMsg(t){ $app.replaceChildren(h("div",{class:"card"},h("p",{class:"lead"},t))); }
 function brand(sub){ return h("div",{class:"brand"},"Avaliação",h("small",{},sub)); }
@@ -187,8 +200,8 @@ function brand(sub){ return h("div",{class:"brand"},"Avaliação",h("small",{},s
 function renderIntro(next,label){
   S.view="intro";
   const box=h("div",{class:"intro",style:"display:flex;flex-direction:column;gap:12px"}); box.innerHTML=INSTRUCOES_HTML;   // texto fixo deste arquivo
-  $app.replaceChildren(h("div",{class:"topbar"},h("div",{class:"bar-row"},brand("sumários e tópicos"))),
-    h("div",{class:"card"},h("h1",{},"Termo de Consentimento Livre e Esclarecido (TCLE) e instruções"),box,h("div",{class:"row"},h("button",{class:"btn primary",onclick:next},label))));
+  $app.replaceChildren(h("div",{class:"topbar"},h("div",{class:"bar-row"},brand("sumários, tópicos e marcações"))),
+    h("div",{class:"card"},h("h1",{},"Instruções"),box,h("div",{class:"row"},h("button",{class:"btn primary",onclick:next},label))));
   window.scrollTo(0,0);
 }
 
@@ -201,8 +214,8 @@ async function renderPeople(msg){
     h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>renderPeople()},"Tentar de novo")))); }
   flush();
   $app.replaceChildren(
-    h("div",{class:"topbar"},h("div",{class:"bar-row"},brand("sumários e tópicos"),
-      h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderPeople(),"Voltar")},"Ver TCLE e instruções"))),
+    h("div",{class:"topbar"},h("div",{class:"bar-row"},brand("sumários, tópicos e marcações"),
+      h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderPeople(),"Voltar")},"Ver instruções"))),
     h("div",{class:"card"},
       h("h1",{},"Quem é você?"),
       h("p",{class:"lead"},"Clique no seu nome para começar ou continuar de onde parou."),
@@ -216,8 +229,8 @@ async function enter(p){
   try{ d = await rpc("sum_entrar",{p_anotador:p.id}); }
   catch(e){ return renderPeople("Não consegui conectar ao servidor ("+e.message+"). Tente de novo."); }
   if(!d) return renderPeople("Anotador não encontrado. Atualize a página.");
-  S.ann=d.anotador; S.saveErr=null; S.rasc={}; S.erroTopico=null;
-  S.itens=d.itens.map(x=>({...x}));
+  S.ann=d.anotador; S.saveErr=null;
+  S.itens=d.itens.map(x=>({...x, sec:parseLista(x.topicos_secundarios)}));
   for(const p of S.pending) if(p.a===S.ann.id){ const it=S.itens.find(x=>x.item===p.item); if(it) Object.assign(it,p.v); }
   const first=S.itens.findIndex(x=>!completo(x));
   go(first<0?0:first);
@@ -226,11 +239,22 @@ async function enter(p){
 
 /* ---------- navegação ---------- */
 function go(i){
-  S.idx=Math.max(0,Math.min(S.itens.length-1,i)); S.erroTopico=null;
-  const it=S.itens[S.idx]; S.step=it?etapaMax(it):"topico";
+  S.idx=Math.max(0,Math.min(S.itens.length-1,i));
+  const it=S.itens[S.idx];
+  if(it){ S.step=etapaMax(it); S.sub=primeiroSub(it,S.step); }
   renderItem();
 }
-function setStep(s){ S.step=s; renderItem(); }
+function setStep(s){ S.step=s; S.sub=primeiroSub(S.itens[S.idx],s); renderItem(); }
+function setSub(k){ S.sub=k; renderItem(true); }
+// Depois de responder um subitem (tópico secundário ou tag): passa para o próximo, ou conclui a etapa.
+function depoisSub(it,s,k){
+  setTimeout(()=>{
+    if(S.view!=="item"||S.itens[S.idx]!==it||S.step!==s||S.sub!==k) return;
+    if(k<nSub(it,s)-1){ S.sub=k+1; renderItem(true); }
+    else if(feita(it,s)) avancar(it);
+    else { S.sub=primeiroSub(it,s); renderItem(true); }
+  },250);
+}
 
 /* ---------- tela do item ---------- */
 function renderItem(keepScroll){
@@ -240,24 +264,27 @@ function renderItem(keepScroll){
   const topbar=h("div",{class:"topbar"},
     h("div",{class:"bar-row"},brand(`${S.ann.nome} · ${done}/${n} concluídos`),
       h("div",{class:"row"},
-        h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderItem(),"Voltar")},"Ver TCLE e instruções"),
+        h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderItem(),"Voltar")},"Ver instruções"),
         h("button",{class:"linkbtn",onclick:()=>renderPeople()},"Trocar de pessoa"))),
     h("div",{class:"progress"},h("i",{style:`width:${n?100*done/n:0}%`})));
   if(!n){ $app.replaceChildren(topbar,h("div",{class:"card"},h("p",{class:"lead"},"Ainda não há itens para você. Avise quem coordena o projeto."))); return; }
 
   const it=S.itens[S.idx], max=ETAPAS.indexOf(etapaMax(it));
-  if(ETAPAS.indexOf(S.step)>max) S.step=ETAPAS[max];
-  const steps=ETAPAS.length<2?null:h("div",{class:"steps"},ETAPAS.map((s,k)=>h("button",{class:"chip"+(s===S.step?" on":""),disabled:k>max?true:null,onclick:()=>setStep(s)},`${k+1}. ${NOME_ETAPA[s]}`)));
-  const transc=h("div",{},h("div",{class:"sec"},`Transcrição · item ${S.idx+1} de ${n}`),
-    h("div",{class:"texto"+(S.step==="topico"?" alto":"")},it.transcricao));
+  if(!ETAPAS.includes(S.step)||ETAPAS.indexOf(S.step)>max) S.step=ETAPAS[max];
+  S.sub=Math.max(0,Math.min(nSub(it,S.step)-1,S.sub));
+  const steps=ETAPAS.length<2?null:h("div",{class:"steps"},ETAPAS.map((s,k)=>h("button",
+    {class:"chip"+(s===S.step?" on":"")+(feita(it,s)&&!vazia(it,s)?" ok":""),disabled:(k>max||vazia(it,s))?true:null,onclick:()=>setStep(s)},`${k+1}. ${NOME_ETAPA[s]}`)));
+  const transc=h("div",{},h("div",{class:"sec"},`Transcrição · item ${S.idx+1} de ${n}`),h("div",{class:"texto"},it.transcricao));
 
-  let body;
-  if(S.step==="topico") body=etapaTopico(it);
-  else if(S.step==="nota") body=etapaNota(it);
-  else body=etapaSumario(it);
+  const body = vazia(it,S.step) ? h("div",{class:"card"},h("p",{class:"lead"},"Este item não tem nada a avaliar nesta etapa."),
+        h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>avancar(it)},"Continuar →")))
+    : S.step==="sumario" ? etapaSumario(it)
+    : S.step==="principal" ? etapaPrincipal(it)
+    : S.step==="secundarios" ? etapaSecundarios(it)
+    : etapaTags(it,S.step);
 
   const fin = done===n ? h("div",{class:"card"},h("strong",{},"Você concluiu todos os itens. Obrigado!"),
-    h("p",{class:"lead"},"Pode revisar as notas; mudar uma nota sobrescreve a anterior.")) : null;
+    h("p",{class:"lead"},"Pode revisar as respostas; mudar uma resposta sobrescreve a anterior.")) : null;
   const st=h("span",{id:"st",class:"status"+(S.saveErr?" err":"")},statusText());
   const nav=h("div",{class:"nav"},
     h("button",{class:"btn",disabled:S.idx===0?true:null,onclick:()=>go(S.idx-1)},"← Item anterior"), st,
@@ -265,60 +292,9 @@ function renderItem(keepScroll){
 
   $app.replaceChildren(...[topbar,fin,h("div",{class:"card"},steps,transc),body,nav].filter(Boolean));
   window.scrollTo(0,keepScroll?y:0);
-  if(S.step==="topico"&&it.topico_humano==null){ const ta=document.getElementById("ta"); if(ta&&!keepScroll) ta.focus({preventScroll:true}); }
 }
 
-function etapaTopico(it){
-  if(it.topico_humano!=null){
-    return h("div",{class:"card"},h("p",{class:"q"},PERGUNTA_TOPICO),
-      h("div",{class:"sec",style:"margin:0"},"Seu tópico (enviado)"),h("div",{class:"term"},it.topico_humano),
-      h("div",{class:"row"},h("button",{class:"btn primary",onclick:()=>avancar(it)},"Continuar →")));
-  }
-  const ta=h("textarea",{id:"ta",rows:"2",placeholder:"Escreva o tópico principal"});
-  ta.value=S.rasc[it.item]||"";
-  const cnt=h("span",{class:"count"}), btn=h("button",{class:"btn primary",onclick:()=>enviarTopico(it,ta.value)},"Enviar tópico");
-  const upd=()=>{ S.rasc[it.item]=ta.value; const w=contaPalavras(ta.value), over=MAXP&&w>MAXP;
-    cnt.textContent=MAXP?`${w}/${MAXP} palavras`:`${w} palavras`; cnt.className="count"+(over?" over":"");
-    btn.disabled=S.enviando||!w||over; };
-  ta.addEventListener("input",upd);
-  ta.addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); if(!btn.disabled) btn.click(); } });
-  upd();
-  return h("div",{class:"card"},
-    h("p",{class:"q"},PERGUNTA_TOPICO),
-    h("p",{class:"hint"},(MAXP?`Responda em até ${MAXP} palavras. `:"")+"Depois de enviar, não é possível alterar."),
-    ta, h("div",{class:"row",style:"justify-content:space-between"},cnt,btn),
-    S.erroTopico?h("div",{class:"err"},S.erroTopico):null);
-}
-async function enviarTopico(it,txt){
-  txt=String(txt||"").trim(); const w=contaPalavras(txt);
-  if(!w||(MAXP&&w>MAXP)||S.enviando) return;
-  S.enviando=true; S.erroTopico=null; renderItem(true);
-  try{
-    const r=await rpc("sum_salvar_topico",{p_anotador:S.ann.id,p_item:it.item,p_topico:txt});
-    Object.assign(it,{topico_humano:r.topico_humano,topico_llm:r.topico_llm,sumario:r.sumario});
-    delete S.rasc[it.item]; S.enviando=false;
-    avancar(it);
-  }catch(e){
-    S.enviando=false; S.erroTopico="Não consegui enviar ("+e.message+"). Seu texto continua aqui; tente de novo.";
-    if(S.view==="item") renderItem(true);
-  }
-}
-
-function etapaNota(it){
-  const cur=it.topico_nota;
-  return h("div",{class:"card"},
-    h("div",{},h("div",{class:"sec"},"Tópico"),h("div",{class:"term"},it.topico_llm)),
-    h("p",{class:"q"},PERGUNTA_NOTA),
-    h("p",{class:"hint"},"Atalho: teclas 0, 1 e 2."),
-    h("div",{class:"opts",role:"radiogroup","aria-label":PERGUNTA_NOTA},
-      NOTA_TOPICO.map(([v,t])=>h("button",{class:`opt o${v}`+(cur===v?" on":""),role:"radio","aria-checked":cur===v?"true":"false",onclick:()=>notaTopico(v)},h("b",{},String(v)),h("span",{},t)))));
-}
-function notaTopico(v){
-  const it=S.itens[S.idx]; if(!it||it.topico_humano==null) return;
-  queue(it,"topico_nota",v); renderItem(true);
-  setTimeout(()=>{ if(S.step==="nota") avancar(it); },250);
-}
-
+/* 1. Sumário: três afirmações, escala de concordância */
 function etapaSumario(it){
   return h("div",{class:"card"},
     h("div",{},h("div",{class:"sec"},"Sumário"),h("div",{class:"texto"},it.sumario)),
@@ -335,13 +311,75 @@ function notaSumario(it,campo,v){
   if(!antes&&feita(it,"sumario")) setTimeout(()=>{ if(S.step==="sumario") avancar(it); },350);
 }
 
-/* ---------- salvamento das notas (fila com reenvio) ---------- */
+/* 2. Tópico principal: nota 0, 1 ou 2 */
+function etapaPrincipal(it){
+  const cur=it.topico_principal_nota;
+  return h("div",{class:"card"},
+    h("div",{},h("div",{class:"sec"},"Tópico principal"),h("div",{class:"term"},it.topico_principal)),
+    h("p",{class:"q"},PERGUNTA_PRINCIPAL),
+    h("p",{class:"hint"},"Atalho: teclas 0, 1 e 2."),
+    h("div",{class:"opts",role:"radiogroup","aria-label":PERGUNTA_PRINCIPAL},
+      NOTA_PRINCIPAL.map(([v,t])=>h("button",{class:`opt o${v}`+(cur===v?" on":""),role:"radio","aria-checked":cur===v?"true":"false",onclick:()=>notaPrincipal(v)},h("b",{},String(v)),h("span",{},t)))));
+}
+function notaPrincipal(v){
+  const it=S.itens[S.idx]; if(!it||vazia(it,"principal")) return;
+  queue(it,"topico_principal_nota",v); renderItem(true);
+  setTimeout(()=>{ if(S.step==="principal") avancar(it); },250);
+}
+
+/* Sim / Não */
+function simNao(cur,onPick,label){
+  return h("div",{class:"ans",role:"radiogroup","aria-label":label},
+    [[true,"Sim","yes"],[false,"Não","no"]].map(([v,t,c])=>h("button",{class:c+(cur===v?" on":""),role:"radio","aria-checked":cur===v?"true":"false",onclick:()=>onPick(v)},t)));
+}
+function subNav(n){
+  return h("div",{class:"subnav"},
+    h("button",{class:"btn",disabled:S.sub===0?true:null,onclick:()=>setSub(S.sub-1)},"← Anterior"),
+    h("span",{},`${S.sub+1} de ${n}`),
+    h("button",{class:"btn",disabled:S.sub>=n-1?true:null,onclick:()=>setSub(S.sub+1)},"Próxima →"));
+}
+
+/* 3. Tópicos secundários: um por vez, duas perguntas Sim/Não */
+function etapaSecundarios(it){
+  const k=S.sub, n=it.sec.length, cur=(it.secundarios||{})[k]||{};
+  return h("div",{class:"card"},
+    h("div",{},h("div",{class:"sec"},`Tópico secundário · ${k+1} de ${n}`),h("div",{class:"term"},it.sec[k])),
+    PERGUNTAS_SECUNDARIO.map(([campo,perg])=>h("div",{class:"crit"},h("p",{class:"q"},perg),
+      simNao(cur[campo],v=>respSecundario(it,k,campo,v),perg))),
+    n>1?subNav(n):null);
+}
+function respSecundario(it,k,campo,v){
+  const o={...(it.secundarios||{})}; o[k]={...(o[k]||{}),[campo]:v};
+  queue(it,"secundarios",o); renderItem(true);
+  if(subFeito(it,"secundarios",k)) depoisSub(it,"secundarios",k);
+}
+
+/* 4 e 5. Marcações de conteúdo e conteúdo potencialmente inadequado: uma tag por vez, Sim/Não */
+function etapaTags(it,s){
+  const L=LISTAS[s], k=S.sub, t=L[k], cur=(it[s]||{})[t.id];
+  return h("div",{class:"card"},
+    h("div",{class:"sec",style:"margin:0"},`${NOME_ETAPA[s]} · ${k+1} de ${L.length}`),
+    h("p",{class:"q"},t.pergunta),
+    t.definicao?h("p",{class:"def"},h("b",{},"Definição"),t.definicao):null,
+    h("p",{class:"hint"},"Atalho: teclas S (sim) e N (não)."),
+    simNao(cur,v=>respTag(s,v),t.pergunta),
+    L.length>1?subNav(L.length):null);
+}
+function respTag(s,v){
+  const it=S.itens[S.idx]; if(!it||S.step!==s||!LISTAS[s]) return;
+  const k=S.sub;
+  queue(it,s,{...(it[s]||{}),[LISTAS[s][k].id]:v}); renderItem(true);
+  depoisSub(it,s,k);
+}
+
+/* ---------- salvamento (fila com reenvio) ---------- */
 function statusText(){
   if(S.saveErr) return S.saveErr;
   if(S.pending.length) return "salvando…";
-  const it=S.itens[S.idx]; return it&&Object.values(CAMPOS_ETAPA).flat().some(c=>it[c]!=null)?"salvo":"";
+  const it=S.itens[S.idx]; return it&&CAMPOS.some(c=>it[c]!=null)?"salvo":"";
 }
 function updateStatus(){ const el=document.getElementById("st"); if(!el) return; el.textContent=statusText(); el.className="status"+(S.saveErr?" err":""); }
+// Para secundarios/tags/inadequado o valor é o objeto inteiro de respostas do item.
 function queue(it,campo,valor){
   it[campo]=valor; S.saveErr=null;
   let p=S.pending.find(p=>p.a===S.ann.id&&p.item===it.item);
@@ -359,14 +397,16 @@ async function flush(){
       ls.set(KEY,JSON.stringify(S.pending));
     }
     S.saveErr=null;
-  }catch(e){ S.saveErr="Sem conexão com o servidor. Suas notas ficam neste navegador e serão reenviadas."; setTimeout(flush,8000); }
+  }catch(e){ S.saveErr="Sem conexão com o servidor. Suas respostas ficam neste navegador e serão reenviadas."; setTimeout(flush,8000); }
   S.flushing=false; updateStatus();
 }
 
 document.addEventListener("keydown",e=>{
-  if(S.view!=="item"||S.step!=="nota"||e.metaKey||e.ctrlKey||e.altKey) return;
+  if(S.view!=="item"||e.metaKey||e.ctrlKey||e.altKey) return;
   if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||"")) return;
-  if(/^[0-2]$/.test(e.key)) notaTopico(Number(e.key));
+  const k=e.key.toLowerCase();
+  if(S.step==="principal"&&/^[0-2]$/.test(k)) notaPrincipal(Number(k));
+  else if(LISTAS[S.step]&&(k==="s"||k==="n")) respTag(S.step,k==="s");
 });
 window.addEventListener("online",flush);
 init();
