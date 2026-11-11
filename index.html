@@ -333,6 +333,7 @@ function secSecundarios(it){
 function secTags(it,s){
   return h("div",{class:"card"},
     h("h2",{},TITULO[s]),
+    s==="tags"?h("p",{class:"hint"},"Observação: nas perguntas abaixo, “the text” se refere à transcrição."):null,
     LISTAS[s].map(t=>{ const cur=(it[s]||{})[t.id];
       return h("div",{class:"crit"},
         h("p",{class:"q"},t.pergunta),
