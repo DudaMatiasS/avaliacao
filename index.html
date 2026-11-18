@@ -78,6 +78,19 @@ h1{font-size:22px;margin:0;line-height:1.25}
 .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .person{border:2px solid var(--line);background:var(--surface);border-radius:6px;padding:16px 10px;font-size:18px;font-weight:600;overflow-wrap:anywhere}
 .person:hover{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+/* navegação entre itens: seletor e grade */
+.sel{font:14px var(--sans);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);max-width:100%}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px}
+.gi{min-height:44px;border-radius:6px;border:2px solid var(--line);background:var(--surface);font:500 14px var(--mono);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;padding:4px 2px}
+.gi small{font-size:10px;opacity:.75}
+.grade{grid-template-columns:repeat(auto-fill,minmax(52px,1fr))}
+.gi:hover{border-color:var(--accent)}
+.gi-cor{display:inline-block;width:14px;height:14px;border-radius:3px;border:2px solid var(--line);background:var(--surface)}
+.gi.ok,.gi-cor.ok{border-color:var(--yes);background:var(--yes-soft);color:var(--yes)}
+.gi.meio,.gi-cor.meio{border-color:var(--mid);background:var(--mid-soft);color:var(--mid)}
+.gi.atual{outline:3px solid var(--accent);outline-offset:1px}
+.legenda{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legenda span{display:flex;gap:6px;align-items:center}
 </style></head>
 <body><div class="wrap" id="app"><div class="card"><p class="lead">Carregando…</p></div></div>
 <script src="config.js"></script>
@@ -172,7 +185,7 @@ function parseLista(t){
 }
 
 /* ---------- estado ---------- */
-const S = { ann:null, itens:[], idx:0, view:"", pending:[], flushing:false, saveErr:null, avisar:false };
+const S = { ann:null, itens:[], idx:0, view:"", pending:[], flushing:false, saveErr:null, avisar:false, grade:false };
 const KEY = "sum_pending_v2";
 const CAMPOS = ["consistencia","cobertura","concisao","topico_principal_nota","secundarios","tags","inadequado"];
 const bool = v => typeof v==="boolean";
@@ -190,6 +203,13 @@ function perguntas(it){
 }
 function faltam(it){ return perguntas(it).filter(f=>!f()).length; }
 function completo(it){ return faltam(it)===0; }
+// "ok" = todas respondidas · "meio" = pelo menos uma respondida · "vazio" = nenhuma
+function estado(it){
+  const q=perguntas(it), r=q.filter(f=>f()).length;
+  return r===q.length ? "ok" : r ? "meio" : "vazio";
+}
+// Número da transcrição na amostra (posicao 0–149 → #1–#150): é o mesmo para todos os avaliadores.
+function codigo(it){ return it.posicao!=null ? `#${Number(it.posicao)+1}` : ""; }
 
 function init(){
   try{ S.pending = JSON.parse(ls.get(KEY)||"[]").filter(p=>p&&p.a&&p.item&&p.v); }catch(e){ S.pending=[]; }
@@ -231,7 +251,7 @@ async function enter(p){
   try{ d = await rpc("sum_entrar",{p_anotador:p.id}); }
   catch(e){ return renderPeople("Não consegui conectar ao servidor ("+e.message+"). Tente de novo."); }
   if(!d) return renderPeople("Anotador não encontrado. Atualize a página.");
-  S.ann=d.anotador; S.saveErr=null;
+  S.ann=d.anotador; S.saveErr=null; S.grade=false;
   S.itens=d.itens.map(x=>({...x, sec:parseLista(x.topicos_secundarios)}));
   for(const p of S.pending) if(p.a===S.ann.id){ const it=S.itens.find(x=>x.item===p.item); if(it) Object.assign(it,p.v); }
   const first=S.itens.findIndex(x=>!completo(x));
@@ -240,11 +260,32 @@ async function enter(p){
 }
 
 /* ---------- navegação ---------- */
-function go(i){ S.idx=Math.max(0,Math.min(S.itens.length-1,i)); S.avisar=false; renderItem(); }
+function go(i){ S.idx=Math.max(0,Math.min(S.itens.length-1,i)); S.avisar=false; S.grade=false; renderItem(); }
 function proximo(){
   const it=S.itens[S.idx];
   if(!completo(it)&&!S.avisar){ S.avisar=true; renderItem(true); return; }   // 1º clique: avisa o que falta; 2º clique: segue mesmo assim
   if(S.idx<S.itens.length-1) go(S.idx+1); else { S.avisar=false; renderItem(true); }
+}
+function alternaGrade(){ S.grade=!S.grade; renderItem(!S.grade); }   // ao abrir, sobe para o topo para a grade ficar visível
+
+/* Seletor na barra do topo: pula direto para qualquer item */
+function seletorItens(){
+  const SIMBOLO={ok:"✓",meio:"◐",vazio:"○"};
+  return h("select",{class:"sel","aria-label":"Ir para o item",onchange:e=>go(Number(e.target.value))},
+    S.itens.map((it,i)=>h("option",{value:i,selected:i===S.idx?true:null},`${SIMBOLO[estado(it)]} Item ${i+1}`+(codigo(it)?` · Transcrição ${codigo(it)}`:""))));
+}
+
+/* Grade com todos os itens, colorida pela situação de cada um */
+function gradeItens(){
+  const LEGENDA=[["ok","Completo"],["meio","Começado"],["vazio","Em branco"]];
+  return h("div",{class:"card"},
+    h("h2",{},"Todos os itens"),
+    h("div",{class:"legenda"},LEGENDA.map(([c,t])=>h("span",{},h("i",{class:"gi-cor "+c}),t)),
+      h("span",{},h("i",{class:"gi-cor",style:"outline:3px solid var(--accent);outline-offset:1px"}),"Item atual")),
+    h("p",{class:"hint"},"Número grande: item na sua lista. Número pequeno: transcrição na amostra (igual para todos os avaliadores)."),
+    h("div",{class:"grade"},S.itens.map((it,i)=>h("button",{
+      class:`gi ${estado(it)}`+(i===S.idx?" atual":""), title:`Item ${i+1}`+(codigo(it)?` · Transcrição ${codigo(it)}`:""),
+      "aria-current":i===S.idx?"true":null, onclick:()=>go(i)},String(i+1),codigo(it)?h("small",{},codigo(it)):null))));
 }
 
 /* ---------- tela do item: tudo em uma página só ---------- */
@@ -255,14 +296,17 @@ function renderItem(keepScroll){
   const topbar=h("div",{class:"topbar"},
     h("div",{class:"bar-row"},brand(`${S.ann.nome} · ${done}/${n} concluídos`),
       h("div",{class:"row"},
+        n?seletorItens():null,
+        n?h("button",{class:"linkbtn",onclick:alternaGrade},S.grade?"Fechar lista":"Ver todos os itens"):null,
         h("button",{class:"linkbtn",onclick:()=>renderIntro(()=>renderItem(),"Voltar")},"Ver TCLE e instruções"))),
     h("div",{class:"progress"},h("i",{style:`width:${n?100*done/n:0}%`})));
   if(!n){ $app.replaceChildren(topbar,h("div",{class:"card"},h("p",{class:"lead"},"Ainda não há itens para você. Avise quem coordena o projeto."))); return; }
 
   const it=S.itens[S.idx], f=faltam(it);
+  const grade = S.grade ? gradeItens() : null;
   const fin = done===n ? h("div",{class:"card"},h("strong",{},"Você concluiu todos os itens. Obrigado!"),
     h("p",{class:"lead"},"Pode revisar as respostas; mudar uma resposta sobrescreve a anterior.")) : null;
-  const transc=h("div",{class:"card"},h("div",{},h("div",{class:"sec"},`Transcrição · item ${S.idx+1} de ${n}`),h("div",{class:"texto"},it.transcricao)));
+  const transc=h("div",{class:"card"},h("div",{},h("div",{class:"sec"},(codigo(it)?`Transcrição ${codigo(it)} · `:"Transcrição · ")+`item ${S.idx+1} de ${n}`),h("div",{class:"texto"},it.transcricao)));
 
   const secoes=ETAPAS.map(s=>
       s==="sumario" ? secSumario(it)
@@ -277,7 +321,7 @@ function renderItem(keepScroll){
     h("button",{class:"btn primary",disabled:S.idx>=n-1?true:null,onclick:proximo},"Próximo item →"));
   const resumo=h("p",{class:"hint"},f?`Faltam ${f} pergunta${f>1?"s":""} neste item.`:"Todas as perguntas deste item foram respondidas.");
 
-  $app.replaceChildren(...[topbar,fin,transc,...secoes,resumo,aviso,nav].filter(Boolean));
+  $app.replaceChildren(...[topbar,grade,fin,transc,...secoes,resumo,aviso,nav].filter(Boolean));
   window.scrollTo(0,keepScroll?y:0);
 }
 
